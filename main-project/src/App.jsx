@@ -9,6 +9,23 @@ import { AuthContext } from './Componants/Auth/TaskList/Authprovider'
 const App = () => {
 
   const [user, setUser] = useState(null)
+  const authData = useContext(AuthContext)
+  useEffect(() => {
+    if(authData){
+      const loggedInUser = localStorage.getItem("loggedInUser")
+      if(loggedInUser){
+        setUser(loggedInUser.role)
+      }
+
+    }
+  
+    
+  }, [authData])
+  
+
+
+ 
+  
 
   useEffect(() => {
     setLocalStorage()
@@ -20,10 +37,13 @@ const App = () => {
     if (email === "admin@me.com" && password === "123") {
 
       setUser("admin")
+      localStorage.setItem("loggedInUser", JSON.stringify({rule:"admin"}))
 
-    } else if (email === "user@me.com" && password === "123") {
+    } else if (authData &&  authData.employee.find((e)=> email == e.email && password == e.password) ) {
 
       setUser("employee")
+            localStorage.setItem("loggedInUser", JSON.stringify({rule:"employee"}))
+
 
     } else {
 
@@ -34,7 +54,7 @@ const App = () => {
   }
 
 
-  const data = useContext(AuthContext)
+  
 
   return (
     <>
