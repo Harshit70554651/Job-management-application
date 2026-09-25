@@ -32,9 +32,6 @@ const App = () => {
       return
     }
 
-
-    // ================= EMPLOYEE =================
-
     if (authData && authData.employee) {
 
       const employee = authData.employee.find(
