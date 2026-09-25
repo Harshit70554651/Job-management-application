@@ -1,69 +1,79 @@
-import React, { useContext, useEffect, useState } from 'react'
+
+import React, { useContext, useState } from 'react'
 
 import Login from './Componants/Auth/Login'
 import EmployeeDashboard from './Componants/Auth/Dashboard/EmployeeDashboard'
 import AdminDashboard from './Componants/Auth/Dashboard/AdminDashboard'
-import { getLocalStorage, setLocalStorage } from './utils/LocalStorage'
 import { AuthContext } from './Componants/Auth/TaskList/Authprovider'
 
 const App = () => {
 
   const [user, setUser] = useState(null)
+  const [loggedInuserData, setLoggedInuserData] = useState(null)
+
   const authData = useContext(AuthContext)
-  useEffect(() => {
-    if(authData){
-      const loggedInUser = localStorage.getItem("loggedInUser")
-      if(loggedInUser){
-        setUser(loggedInUser.role)
-      }
 
-    }
-  
-    
-  }, [authData])
-  
-
-
- 
-  
-
-  useEffect(() => {
-    setLocalStorage()
-    getLocalStorage()
-  }, [])
 
   const handleLogin = (email, password) => {
+
+    // ================= ADMIN =================
 
     if (email === "admin@me.com" && password === "123") {
 
       setUser("admin")
-      localStorage.setItem("loggedInUser", JSON.stringify({rule:"admin"}))
 
-    } else if (authData &&  authData.employee.find((e)=> email == e.email && password == e.password) ) {
+      localStorage.setItem(
+        "loggedInUser",
+        JSON.stringify({
+          role: "admin"
+        })
+      )
 
-      setUser("employee")
-            localStorage.setItem("loggedInUser", JSON.stringify({rule:"employee"}))
-
-
-    } else {
-
-      alert("Invalid details. Please try again")
-
+      return
     }
 
+
+    // ================= EMPLOYEE =================
+
+    if (authData && authData.employee) {
+
+      const employee = authData.employee.find(
+        (e) =>
+          e.email === email &&
+          e.password === password
+      )
+
+      if (employee) {
+
+        setUser("employee")
+        setLoggedInuserData(employee)
+
+        localStorage.setItem(
+          "loggedInUser",
+          JSON.stringify({
+            role: "employee",
+            employee: employee
+          })
+        )
+
+        return
+      }
+    }
+
+
+    // ================= INVALID =================
+
+    alert("Invalid email or password")
   }
 
 
-  
-
   return (
     <>
-      {!user ? (
-        <Login handleLogin={handleLogin} />
-      ) : user === "admin" ? (
-        <AdminDashboard />
-      ) : (
-        <EmployeeDashboard />
+      {!user ? <Login handleLogin={handleLogin} /> : ''}
+
+      {user === "admin" ? <AdminDashboard /> : (user == "employee" ? <EmployeeDashboard data={loggedInuserData} /> : null) }
+
+      {user === "employee" && (<EmployeeDashboard data={loggedInuserData}/>
       )}
     </>
   )
